@@ -11,21 +11,27 @@ export function App() {
   const [tactic, setTactic] = useState<Tactic>(HOME_TEAM.tactic);
   const [opponentIdx, setOpponentIdx] = useState(0);
   const [matchKey, setMatchKey] = useState(0);
+  const [mobilePanel, setMobilePanel] = useState<'setup' | 'squad'>('setup');
 
   const home: Team = { ...HOME_TEAM, tactic };
   const away = OPPONENTS[opponentIdx];
 
+  function kickoff() {
+    setTab('match');
+    setMatchKey(k => k + 1);
+  }
+
   return (
     <div className="app">
-      <div className="topbar">
+      <header className="topbar">
         <h1>TACTIC MANAGER · v0.1</h1>
-        <div className="tabs">
-          <div className={`tab ${tab === 'tactics' ? 'active' : ''}`} onClick={() => setTab('tactics')}>Tactics</div>
-          <div className={`tab ${tab === 'match' ? 'active' : ''}`} onClick={() => setTab('match')}>Match</div>
-        </div>
-      </div>
+        <nav className="tabs" aria-label="Main view">
+          <button className={`tab ${tab === 'tactics' ? 'active' : ''}`} onClick={() => setTab('tactics')}>Tactics</button>
+          <button className={`tab ${tab === 'match' ? 'active' : ''}`} onClick={() => setTab('match')}>Match</button>
+        </nav>
+      </header>
 
-      <div className="sidebar">
+      <aside className={`sidebar mobile-${mobilePanel === 'setup' ? 'open' : 'closed'}`}>
         <h2>Your tactic</h2>
         <div style={{ fontWeight: 600 }}>{tactic.name}</div>
         <div style={{ color: 'var(--muted)', fontSize: 12 }}>{tactic.formationLabel}</div>
@@ -33,12 +39,12 @@ export function App() {
         <h2>Opponent</h2>
         <div className="opp-pick">
           {OPPONENTS.map((opp, i) => (
-            <div key={opp.id}
+            <button key={opp.id}
                  className={`opt ${i === opponentIdx ? 'active' : ''}`}
                  onClick={() => setOpponentIdx(i)}>
-              <div className="name" style={{ color: opp.primaryColor }}>{opp.name}</div>
-              <div className="sub">{opp.tactic.name} · {opp.tactic.formationLabel}</div>
-            </div>
+              <span className="name" style={{ color: opp.primaryColor }}>{opp.name}</span>
+              <span className="sub">{opp.tactic.name} · {opp.tactic.formationLabel}</span>
+            </button>
           ))}
         </div>
 
@@ -51,19 +57,19 @@ export function App() {
         </div>
 
         <h2>Run a match</h2>
-        <button className="primary" style={{ width: '100%' }} onClick={() => { setTab('match'); setMatchKey(k => k + 1); }}>
+        <button className="primary kickoff-button" onClick={kickoff}>
           Kickoff vs {away.shortName}
         </button>
-      </div>
+      </aside>
 
-      <div className="main">
+      <main className="main">
         {tab === 'tactics' && <PhaseEditor tactic={tactic} onChange={setTactic} />}
         {tab === 'match' && (
           <MatchView key={matchKey} home={home} away={away} onExit={() => setTab('tactics')} />
         )}
-      </div>
+      </main>
 
-      <div className="rightbar">
+      <aside className={`rightbar mobile-${mobilePanel === 'squad' ? 'open' : 'closed'}`}>
         <h2 style={{ fontSize: 11, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: 0.6, margin: 0 }}>Squad</h2>
         <div style={{ fontSize: 12, marginTop: 8 }}>
           {home.players.map(p => (
@@ -75,6 +81,12 @@ export function App() {
             </div>
           ))}
         </div>
+      </aside>
+
+      <div className="mobile-dock" aria-label="Mobile panels">
+        <button className={mobilePanel === 'setup' ? 'active' : ''} onClick={() => setMobilePanel('setup')}>Setup</button>
+        <button className={tab === 'match' ? 'active' : ''} onClick={kickoff}>Kickoff</button>
+        <button className={mobilePanel === 'squad' ? 'active' : ''} onClick={() => setMobilePanel('squad')}>Squad</button>
       </div>
     </div>
   );
