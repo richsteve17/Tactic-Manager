@@ -60,19 +60,19 @@ export function PhaseEditor({ tactic, onChange }: Props) {
   }
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+    <div className="phase-editor">
       <div>
         <div className="phase-list">
           {ALL_PHASES.map(p => {
             const def = tactic.phases[p];
             const triggerCount = def?.triggers.length ?? 0;
             return (
-              <div key={p}
+              <button key={p}
                    className={`phase ${p === active ? 'active' : ''}`}
                    onClick={() => setActive(p)}>
                 <span>{PHASE_LABEL[p]}</span>
                 <span className="badge">{triggerCount} trig</span>
-              </div>
+              </button>
             );
           })}
         </div>
@@ -100,12 +100,12 @@ export function PhaseEditor({ tactic, onChange }: Props) {
               </div>
             ))}
 
-            <h2 style={{ fontSize: 11, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: 0.6, marginTop: 16 }}>Trigger library — click to add</h2>
+            <h2 style={{ fontSize: 11, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: 0.6, marginTop: 16 }}>Trigger library — tap to add</h2>
             {LIBRARY.map(t => (
-              <div className="trigger-card" key={t.id} style={{ cursor: 'pointer' }} onClick={() => addTrigger(t)}>
-                <div className="label">{t.label}</div>
-                <div className="meta">when: {whenLabel(t)} → {thenLabel(t)}</div>
-              </div>
+              <button className="trigger-card trigger-button" key={t.id} onClick={() => addTrigger(t)}>
+                <span className="label">{t.label}</span>
+                <span className="meta">when: {whenLabel(t)} → {thenLabel(t)}</span>
+              </button>
             ))}
 
             <h2 style={{ fontSize: 11, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: 0.6, marginTop: 16 }}>Shape preview</h2>
@@ -143,7 +143,7 @@ function thenLabel(t: Trigger): string {
 function ShapeMini({ phase }: { phase: { shape: Record<string, { x: number; y: number }> } }) {
   const W = 320, H = W * (PITCH_H / PITCH_W);
   return (
-    <svg width={W} height={H} style={{ background: '#1d3a26', borderRadius: 6, border: '1px solid var(--border)' }}>
+    <svg className="shape-mini" viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Shape preview">
       <rect x={1} y={1} width={W - 2} height={H - 2} stroke="#d6e3d8" fill="none" />
       <line x1={W / 2} y1={1} x2={W / 2} y2={H - 1} stroke="#d6e3d8" />
       <circle cx={W / 2} cy={H / 2} r={W * 0.085} stroke="#d6e3d8" fill="none" />
@@ -157,66 +157,15 @@ function ShapeMini({ phase }: { phase: { shape: Record<string, { x: number; y: n
   );
 }
 
-// === Trigger library — what you can drag onto a phase ===
 const LIBRARY: Trigger[] = [
-  {
-    id: 'lib.press.cb.weakfoot', label: 'Press the CB on weak-foot reception',
-    when: { kind: 'ballReceivedBy', roleClass: 'cb', weakFoot: true },
-    then: { kind: 'press', who: 'ST', commit: 'commit' },
-    gatedBy: 'tacticalIQ',
-  },
-  {
-    id: 'lib.press.fb.touch.r', label: 'Press their LB near the touchline',
-    when: { kind: 'ballReceivedBy', roleClass: 'fullback', nearTouchline: true },
-    then: { kind: 'press', who: 'RW', commit: 'commit' },
-    gatedBy: 'tacticalIQ',
-  },
-  {
-    id: 'lib.press.fb.touch.l', label: 'Press their RB near the touchline',
-    when: { kind: 'ballReceivedBy', roleClass: 'fullback', nearTouchline: true },
-    then: { kind: 'press', who: 'LW', commit: 'commit' },
-    gatedBy: 'tacticalIQ',
-  },
-  {
-    id: 'lib.press.backpass', label: 'Spring on a back pass to the GK',
-    when: { kind: 'backPass', from: 'cb' },
-    then: { kind: 'press', who: 'ST', commit: 'commit' },
-    gatedBy: 'tacticalIQ',
-  },
-  {
-    id: 'lib.press.hold.cm', label: 'Jump their pivot if he holds it',
-    when: { kind: 'ballHeldFor', minSeconds: 2, by: 'cm' },
-    then: { kind: 'press', who: 'AM', commit: 'shadow' },
-    gatedBy: 'tacticalIQ',
-  },
-  {
-    id: 'lib.thirdman.rw', label: 'RW makes a third-man run when AM holds',
-    when: { kind: 'ballReceivedBy', roleClass: 'cm', inThird: 'att' },
-    then: { kind: 'thirdManRun', who: 'RW', toThird: 'att', toHalf: 'right' },
-    gatedBy: 'tacticalIQ',
-  },
-  {
-    id: 'lib.thirdman.lw', label: 'LW makes a third-man run when AM holds',
-    when: { kind: 'ballReceivedBy', roleClass: 'cm', inThird: 'att' },
-    then: { kind: 'thirdManRun', who: 'LW', toThird: 'att', toHalf: 'left' },
-    gatedBy: 'tacticalIQ',
-  },
-  {
-    id: 'lib.overlap.lb', label: 'LB overlaps on LW reception',
-    when: { kind: 'ballReceivedBy', roleClass: 'wing', inThird: 'att' },
-    then: { kind: 'overlap', who: 'LB' },
-    gatedBy: 'tacticalIQ',
-  },
-  {
-    id: 'lib.overlap.rb', label: 'RB overlaps on RW reception',
-    when: { kind: 'ballReceivedBy', roleClass: 'wing', inThird: 'att' },
-    then: { kind: 'overlap', who: 'RB' },
-    gatedBy: 'tacticalIQ',
-  },
-  {
-    id: 'lib.loose.def', label: 'On loose touch in their def third, collapse the front line',
-    when: { kind: 'looseTouch', in: 'def' },
-    then: { kind: 'press', who: 'ST', commit: 'commit' },
-    gatedBy: 'tacticalIQ',
-  },
+  { id: 'lib.press.cb.weakfoot', label: 'Press the CB on weak-foot reception', when: { kind: 'ballReceivedBy', roleClass: 'cb', weakFoot: true }, then: { kind: 'press', who: 'ST', commit: 'commit' }, gatedBy: 'tacticalIQ' },
+  { id: 'lib.press.fb.touch.r', label: 'Press their LB near the touchline', when: { kind: 'ballReceivedBy', roleClass: 'fullback', nearTouchline: true }, then: { kind: 'press', who: 'RW', commit: 'commit' }, gatedBy: 'tacticalIQ' },
+  { id: 'lib.press.fb.touch.l', label: 'Press their RB near the touchline', when: { kind: 'ballReceivedBy', roleClass: 'fullback', nearTouchline: true }, then: { kind: 'press', who: 'LW', commit: 'commit' }, gatedBy: 'tacticalIQ' },
+  { id: 'lib.press.backpass', label: 'Spring on a back pass to the GK', when: { kind: 'backPass', from: 'cb' }, then: { kind: 'press', who: 'ST', commit: 'commit' }, gatedBy: 'tacticalIQ' },
+  { id: 'lib.press.hold.cm', label: 'Jump their pivot if he holds it', when: { kind: 'ballHeldFor', minSeconds: 2, by: 'cm' }, then: { kind: 'press', who: 'AM', commit: 'shadow' }, gatedBy: 'tacticalIQ' },
+  { id: 'lib.thirdman.rw', label: 'RW makes a third-man run when AM holds', when: { kind: 'ballReceivedBy', roleClass: 'cm', inThird: 'att' }, then: { kind: 'thirdManRun', who: 'RW', toThird: 'att', toHalf: 'right' }, gatedBy: 'tacticalIQ' },
+  { id: 'lib.thirdman.lw', label: 'LW makes a third-man run when AM holds', when: { kind: 'ballReceivedBy', roleClass: 'cm', inThird: 'att' }, then: { kind: 'thirdManRun', who: 'LW', toThird: 'att', toHalf: 'left' }, gatedBy: 'tacticalIQ' },
+  { id: 'lib.overlap.lb', label: 'LB overlaps on LW reception', when: { kind: 'ballReceivedBy', roleClass: 'wing', inThird: 'att' }, then: { kind: 'overlap', who: 'LB' }, gatedBy: 'tacticalIQ' },
+  { id: 'lib.overlap.rb', label: 'RB overlaps on RW reception', when: { kind: 'ballReceivedBy', roleClass: 'wing', inThird: 'att' }, then: { kind: 'overlap', who: 'RB' }, gatedBy: 'tacticalIQ' },
+  { id: 'lib.loose.def', label: 'On loose touch in their def third, collapse the front line', when: { kind: 'looseTouch', in: 'def' }, then: { kind: 'press', who: 'ST', commit: 'commit' }, gatedBy: 'tacticalIQ' },
 ];
