@@ -19,6 +19,7 @@ export function MatchView({ home, away, onExit }: Props) {
   const [tickCount, setTickCount] = useState(0);
   const [speedIdx, setSpeedIdx] = useState(2);
   const [done, setDone] = useState(false);
+  const [showLog, setShowLog] = useState(false);
 
   const liveRef = useRef<LiveMatch | null>(null);
   if (!liveRef.current) {
@@ -34,7 +35,6 @@ export function MatchView({ home, away, onExit }: Props) {
       const live = liveRef.current!;
       const speed = SPEEDS[speedIdx];
       if (speed > 0 && live.state.simSeconds < live.state.matchLengthSeconds) {
-        // Advance simSeconds by dtMs/1000 * speed (real seconds → sim seconds).
         const simAdvance = (dtMs / 1000) * speed;
         live.fastForward(simAdvance);
         setTickCount(t => t + 1);
@@ -58,7 +58,7 @@ export function MatchView({ home, away, onExit }: Props) {
 
   if (done) {
     return (
-      <div>
+      <div className="match-done">
         <ReportView state={state} report={buildReport(state)} />
         <div style={{ marginTop: 12 }}>
           <button onClick={onExit}>Back to setup</button>
@@ -68,8 +68,8 @@ export function MatchView({ home, away, onExit }: Props) {
   }
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: 16 }}>
-      <div className="pitch-wrap">
+    <div className="match-layout">
+      <section className="pitch-wrap match-stage">
         <div className="pitch-meta">
           <div className="clock">{String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}</div>
           <div className="score" style={{ color: home.primaryColor }}>{home.shortName} {state.score.home}</div>
@@ -84,21 +84,22 @@ export function MatchView({ home, away, onExit }: Props) {
         <div className="pitch-controls">
           <button onClick={() => setSpeedIdx(0)} disabled={speedIdx === 0}>Pause</button>
           <button onClick={() => setSpeedIdx(Math.max(0, speedIdx - 1))}>−</button>
-          <span style={{ minWidth: 60, textAlign: 'center', fontFamily: 'monospace' }}>×{SPEEDS[speedIdx]}</span>
+          <span className="speed-readout">×{SPEEDS[speedIdx]}</span>
           <button onClick={() => setSpeedIdx(Math.min(SPEEDS.length - 1, speedIdx + 1))}>+</button>
           <button onClick={() => { live.fastForward(60); setTickCount(t => t + 1); }}>+1 min</button>
-          <button onClick={() => { live.fastForward(state.matchLengthSeconds - state.simSeconds); setTickCount(t => t + 1); }}>Skip to end</button>
-          <button onClick={onExit} style={{ marginLeft: 'auto' }}>Exit</button>
+          <button onClick={() => { live.fastForward(state.matchLengthSeconds - state.simSeconds); setTickCount(t => t + 1); }}>Skip</button>
+          <button className="mobile-log-toggle" onClick={() => setShowLog(v => !v)}>{showLog ? 'Pitch' : 'Log'}</button>
+          <button onClick={onExit} className="exit-button">Exit</button>
         </div>
-      </div>
-      <EventLog events={recent} />
+      </section>
+      <EventLog events={recent} showOnMobile={showLog} />
     </div>
   );
 }
 
-function EventLog({ events }: { events: MatchEvent[] }) {
+function EventLog({ events, showOnMobile }: { events: MatchEvent[]; showOnMobile: boolean }) {
   return (
-    <div className="pitch-wrap" style={{ alignItems: 'stretch', maxHeight: 600 }}>
+    <aside className={`pitch-wrap event-panel ${showOnMobile ? 'mobile-open' : ''}`}>
       <div style={{ fontWeight: 600, marginBottom: 6 }}>Live events</div>
       <div className="event-log">
         {events.slice().reverse().map((ev, i) => {
@@ -119,7 +120,7 @@ function EventLog({ events }: { events: MatchEvent[] }) {
           );
         })}
       </div>
-    </div>
+    </aside>
   );
 }
 
