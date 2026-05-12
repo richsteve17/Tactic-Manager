@@ -24,7 +24,17 @@ export function PitchView({ state }: Props) {
     drawState(ctx, state);
   }, [state, state.simSeconds]);
 
-  return <canvas ref={canvasRef} width={RENDER_W} height={RENDER_H} style={{ display: 'block', borderRadius: 6, background: '#1d3a26' }} />;
+  return (
+    <div className="pitch-canvas-shell">
+      <canvas
+        ref={canvasRef}
+        width={RENDER_W}
+        height={RENDER_H}
+        className="pitch-canvas"
+        aria-label="Live tactical pitch"
+      />
+    </div>
+  );
 }
 
 function toScreen(x: number, y: number): { sx: number; sy: number } {
