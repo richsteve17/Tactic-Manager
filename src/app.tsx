@@ -5,20 +5,31 @@ import { PhaseEditor } from './ui/PhaseEditor';
 import { MatchView } from './ui/MatchView';
 
 type Tab = 'tactics' | 'match';
+type MobilePanel = 'none' | 'setup' | 'squad';
 
 export function App() {
   const [tab, setTab] = useState<Tab>('tactics');
   const [tactic, setTactic] = useState<Tactic>(HOME_TEAM.tactic);
   const [opponentIdx, setOpponentIdx] = useState(0);
   const [matchKey, setMatchKey] = useState(0);
-  const [mobilePanel, setMobilePanel] = useState<'setup' | 'squad'>('setup');
+  const [mobilePanel, setMobilePanel] = useState<MobilePanel>('none');
 
   const home: Team = { ...HOME_TEAM, tactic };
   const away = OPPONENTS[opponentIdx];
 
   function kickoff() {
+    setMobilePanel('none');
     setTab('match');
     setMatchKey(k => k + 1);
+  }
+
+  function setTabAndClosePanel(next: Tab) {
+    setMobilePanel('none');
+    setTab(next);
+  }
+
+  function togglePanel(next: Exclude<MobilePanel, 'none'>) {
+    setMobilePanel(cur => cur === next ? 'none' : next);
   }
 
   return (
@@ -26,8 +37,8 @@ export function App() {
       <header className="topbar">
         <h1>TACTIC MANAGER · v0.1</h1>
         <nav className="tabs" aria-label="Main view">
-          <button className={`tab ${tab === 'tactics' ? 'active' : ''}`} onClick={() => setTab('tactics')}>Tactics</button>
-          <button className={`tab ${tab === 'match' ? 'active' : ''}`} onClick={() => setTab('match')}>Match</button>
+          <button className={`tab ${tab === 'tactics' ? 'active' : ''}`} onClick={() => setTabAndClosePanel('tactics')}>Tactics</button>
+          <button className={`tab ${tab === 'match' ? 'active' : ''}`} onClick={() => setTabAndClosePanel('match')}>Match</button>
         </nav>
       </header>
 
@@ -65,7 +76,7 @@ export function App() {
       <main className="main">
         {tab === 'tactics' && <PhaseEditor tactic={tactic} onChange={setTactic} />}
         {tab === 'match' && (
-          <MatchView key={matchKey} home={home} away={away} onExit={() => setTab('tactics')} />
+          <MatchView key={matchKey} home={home} away={away} onExit={() => setTabAndClosePanel('tactics')} />
         )}
       </main>
 
@@ -84,9 +95,9 @@ export function App() {
       </aside>
 
       <div className="mobile-dock" aria-label="Mobile panels">
-        <button className={mobilePanel === 'setup' ? 'active' : ''} onClick={() => setMobilePanel('setup')}>Setup</button>
+        <button className={mobilePanel === 'setup' ? 'active' : ''} onClick={() => togglePanel('setup')}>Setup</button>
         <button className={tab === 'match' ? 'active' : ''} onClick={kickoff}>Kickoff</button>
-        <button className={mobilePanel === 'squad' ? 'active' : ''} onClick={() => setMobilePanel('squad')}>Squad</button>
+        <button className={mobilePanel === 'squad' ? 'active' : ''} onClick={() => togglePanel('squad')}>Squad</button>
       </div>
     </div>
   );
