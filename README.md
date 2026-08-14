@@ -1,66 +1,32 @@
-# Tactic-Manager
+# 📋 Tactic-Manager
 
-Football tactics sim
+**Tactical Football Match Engine & Visualizer**
 
-## 🎯 Purpose
-This repository contains a web application or API service, a frontend user interface, CI/CD automation workflows, automated test suites.
+A deterministic, tick-based football simulation engine and tactical board. Define formations, spatial shapes, pressing triggers, and transition behaviors, then watch the simulation resolve phases of play in real time.
 
-## 🛠️ Tech Stack
-- **Primary Language**: TypeScript
-- **Key Dependencies**: `@types/react`, `@types/react-dom`, `@vitejs/plugin-react`, `react`, `react-dom`, `typescript`, `vite`, `vitest`
-- **CI/CD**: GitHub Actions / Automated Workflows
-- **Testing**: Test suite included
+---
 
-## 🔑 Key Components
-- **Functions**: `App`, `kickoff`, `setTabAndClosePanel`, `togglePanel`, `iqColor`
+## ⚡ Engine Architecture
+- **Tick Engine (`src/engine/tick.ts`)**: Discrete time-step resolution of player positioning, passing lanes, spatial occupation, and duel physics.
+- **Tactical Shapes & Presets (`src/presets/`)**: Pre-configured shapes (4-3-3, 4-2-3-1, 3-5-2, low block, Gegenpress) with configurable width, depth, and passing tempos.
+- **Trigger System (`src/engine/triggers.ts`)**: Event-driven tactical triggers (pressing on heavy touch, counter-press on turnover, overlapping fullbacks).
+- **Match Reports (`src/engine/report.ts`)**: Post-match expected goals (xG), heatmaps, pass network analysis, and phase breakdown.
 
-## 📦 Installation
+---
+
+## 🛠️ Stack
+- React 18, TypeScript 5.6, Vite 5, Vitest
+
+---
+
+## 🚀 Running & Testing
 ```bash
-# Clone the repository
-git clone https://github.com/richsteve17/Tactic-Manager.git
-cd Tactic-Manager
-
 # Install dependencies
 npm install
 
-# Optional: build if needed
-npm run build
+# Run dev server
+npm run dev
+
+# Run engine unit tests
+npm test
 ```
-## 💡 Usage
-Start the development server:
-```bash
-# For Node.js / Express / Next.js
-npm start  # or npm run dev
-
-# For Python (FastAPI / Flask)
-uvicorn main:app --reload  # or python app.py
-```
-The application will be accessible locally.
-
-## ⚙️ Configuration
-- `package.json` — Node.js project metadata and dependencies
-- `tsconfig.json` — TypeScript compiler configuration
-
-## 📚 Examples
-See source code for detailed method signatures and inline documentation.
-
-Key function calls:
-- `App(...)`
-- `kickoff(...)`
-- `setTabAndClosePanel(...)`
-
-## 🤝 Contributing
-Contributions are welcome! Please open an issue or submit a pull request.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📄 License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-- Built for [Tactic-Manager](https://github.com/richsteve17/Tactic-Manager).
-- Generated with ❤️ using custom code-aware documentation tools.
